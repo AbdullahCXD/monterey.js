@@ -1,0 +1,40 @@
+{
+  "name": "monterey.js",
+  "version": "1.0.0",
+  "description": "A JSON (JavaScript Object Notation) converter/language transpiles to JavaScript",
+  "main": "dist/index.js",
+  "typings": "./typings/index.d.ts",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "tsc",
+    "postinstall": "pnpm build"
+  },
+  "keywords": [
+    "cli",
+    "language",
+    "transpiler",
+    "json"
+  ],
+  "author": "AbdullahCXD",
+  "license": "MIT",
+  "packageManager": "pnpm@10.5.2",
+  "dependencies": {
+    "@inquirer/prompts": "^7.3.3",
+    "commander": "^13.1.0",
+    "consola": "^3.4.0",
+    "dotenv": "^16.4.7",
+    "lodash": "^4.17.21",
+    "semver": "^7.7.1"
+  },
+  "devDependencies": {
+    "@types/node": "^22.13.10",
+    "@types/semver": "^7.5.8",
+    "tsx": "^4.19.3",
+    "typescript": "^5.8.2"
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "esbuild"
+    ]
+  }
+}
