@@ -75,7 +75,7 @@ To use the schema in your Monterey files:
 1. Reference it in your .monjson file:
 ```json
 {
-    "$schema": "https://raw.githubusercontent.com/abdullahcxd/monterey.js/main/schema/monterey.schema.json",
+    "$schema": "https://raw.githubusercontent.com/AbdullahCXD/monterey.js/refs/heads/develop/schema/monterey.schema.json",
     // ... rest of your config
 }
 ```

@@ -1,7 +1,16 @@
-
-
 export type ErrorCodeBody = { name?: string, code?: ErrorCodeList };
-export type ErrorCodeList = "OUTDATED" | "INVALID_VERSION" | "TRANSPILE_ERROR" | "BUILD_ERROR" | "INVALID_EXT" | "NO_TRANSPILER" | "FN_NOT_FOUND" | "Unknown";
+export type ErrorCodeList = 
+    | "OUTDATED" 
+    | "INVALID_VERSION" 
+    | "TRANSPILE_ERROR" 
+    | "BUILD_ERROR" 
+    | "INVALID_EXT" 
+    | "NO_TRANSPILER" 
+    | "FN_NOT_FOUND" 
+    | "SCHEMA_ERROR"
+    | "INVALID_JSON"
+    | "EMPTY_CONTENT"
+    | "Unknown";
 
 export class ErrorBuilder {
 
@@ -69,6 +78,21 @@ export const ErrorCodes = {
     INVALID_VERSION: new ErrorBuilder()
         .setName("Invalid Version")
         .setCode("INVALID_VERSION")
+        .build(),
+
+    SCHEMA_ERROR: new ErrorBuilder()
+        .setName("Schema Validation")
+        .setCode("SCHEMA_ERROR")
+        .build(),
+        
+    INVALID_JSON: new ErrorBuilder()
+        .setName("Invalid JSON")
+        .setCode("INVALID_JSON")
+        .build(),
+        
+    EMPTY_CONTENT: new ErrorBuilder()
+        .setName("Empty Content")
+        .setCode("EMPTY_CONTENT")
         .build(),
 
 };

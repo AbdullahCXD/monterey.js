@@ -34,7 +34,7 @@ Here's how simple it is to use Monterey:
 1️⃣ Create your Monterey file (`hello.monjson`):
 ```json
 {
-    "$schema": "https://raw.githubusercontent.com/abdullahcxd/monterey.js/main/schema/monterey.schema.json",
+    "$schema": "https://raw.githubusercontent.com/AbdullahCXD/monterey.js/refs/heads/develop/schema/monterey.schema.json",
     "header": {
         "montereyVersion": "1.0.0"
     },

@@ -1,0 +1,38 @@
+{
+  "$schema": "https://raw.githubusercontent.com/AbdullahCXD/monterey.js/refs/heads/develop/schema/monterey.schema.json",
+  "header": {
+    "montereyVersion": "1.0.0"
+  },
+  "variables": [
+    {
+      "name": "test",
+      "immutable": false,
+      "value": "something"
+    },
+    {
+      "name": "test1",
+      "immutable": false,
+      "value": "something"
+    },
+    {
+      "name": "test2",
+      "immutable": false,
+      "value": "something"
+    },
+    {
+      "name": "test3",
+      "immutable": false,
+      "value": "something"
+    },
+    {
+      "name": "test4",
+      "immutable": false,
+      "value": "something"
+    },
+    {
+      "name": "test5",
+      "immutable": false,
+      "value": "something"
+    }
+  ]
+}

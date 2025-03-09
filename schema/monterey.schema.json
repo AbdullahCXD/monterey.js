@@ -7,6 +7,7 @@
         "header": {
             "type": "object",
             "required": ["montereyVersion"],
+            "description": "Header content of a Monterey file, this is not custom.",
             "properties": {
                 "montereyVersion": {
                     "type": "string",
@@ -22,6 +23,7 @@
         },
         "variables": {
             "type": "array",
+            "description": "Variable list",
             "items": {
                 "type": "object",
                 "required": ["name", "value", "immutable"],
@@ -43,6 +45,7 @@
         },
         "functions": {
             "type": "array",
+            "description": "Function list",
             "items": {
                 "type": "object",
                 "required": ["name", "parameters", "body"],
@@ -84,6 +87,7 @@
         },
         "classes": {
             "type": "array",
+            "description": "Class list",
             "items": {
                 "type": "object",
                 "required": ["name", "constructor", "body"],

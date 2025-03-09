@@ -3,79 +3,178 @@ import { MontereyContent, MontereyVariable } from "../types";
 import semver from "semver"
 import { Transpiler } from "./Transpiler";
 import { getMontereyVersion } from "../MontereyHeaders";
+import { formatValue } from "../utils";
 
+/**
+ * Default Monterey transpiler that converts Monterey JSON to readable JavaScript
+ * @class MontereyTranspiler
+ * @extends {Transpiler}
+ */
 export class MontereyTranspiler extends Transpiler {
+    /** Cache for already written variables to improve performance */
+    private readonly variableCache = new Set<string>();
     
     constructor() {
         super();
     }
 
+    /**
+     * Transpiles Monterey content to JavaScript
+     * @param {string} content - Raw Monterey JSON content
+     * @returns {string} Transpiled JavaScript code
+     * @throws {MontereyError} When content is invalid
+     */
     transpile(content: string): string {
-
         const resolvedJSONCode = this.parseJSONContent(content);
-        const js = this.toJavaScript(resolvedJSONCode);
-
-        return js;
-
+        return this.toJavaScript(resolvedJSONCode);
     }
 
-    toJavaScript(content: MontereyContent) {
+    /**
+     * Converts parsed Monterey content to JavaScript code
+     * @param {MontereyContent} content - Parsed Monterey content
+     * @returns {string} Generated JavaScript code
+     */
+    toJavaScript(content: MontereyContent): string {
+        const sections = new Map<string, string[]>([
+            ['variables', []],
+            ['classes', []],
+            ['functions', []]
+        ]);
 
-        let javaScriptVariableArray: string[] = [];
-
-        /* Section 1: Variables */
-        if (content.variables && content.variables.length) {
-            javaScriptVariableArray = this.resolveVariables(content.variables);
+        if (content.variables?.length) {
+            sections.set('variables', this.resolveVariables(content.variables));
         }
 
-        return this.build(javaScriptVariableArray, [], []);
+        return this.build(
+            sections.get('variables') || [],
+            sections.get('functions') || [],
+            sections.get('classes') || []
+        );
     }
 
-    build(variables: string[], functions: string[], classes: string[]) {
-        let content = ``;
+    /**
+     * Builds final JavaScript output with proper formatting
+     * @param {string[]} variables - Processed variable declarations
+     * @param {string[]} functions - Processed function declarations
+     * @param {string[]} classes - Processed class declarations
+     * @returns {string} Formatted JavaScript code
+     */
+    build(variables: string[], functions: string[], classes: string[]): string {
+        const sections = [
+            { title: 'Variables', content: variables },
+            { title: 'Classes', content: classes },
+            { title: 'Functions', content: functions }
+        ];
 
-        /* Start with variables at the top */
-        content += `/* Generated Variables */\n${variables.join(`\n`)}\n\n`;
-
-        /* Secondly classes */
-        content += `/* Generated Classes */\n${classes.join(`\n`)}\n\n`;
-
-        /* Finish with functions */
-        content += `/* Generated Functions */\n${functions.join("\n")}\n\n`;
-
-        return content;
-
+        return sections
+            .map(({ title, content }) => 
+                `/* Generated ${title} */\n${content.join('\n')}\n`
+            )
+            .filter(section => section.trim())
+            .join('\n');
     }
 
+    /**
+     * Processes variable declarations
+     * @param {MontereyVariable[]} variables - Array of variable definitions
+     * @returns {string[]} Processed variable declarations
+     * @throws {MontereyError} When duplicate variables are found
+     */
     resolveVariables(variables: MontereyVariable[]): string[] {
-        const jsArray: string[] = [];
-        const alreadyWritten: string[] = []
+        this.variableCache.clear();
+        
+        return variables.map(variable => {
+            if (this.variableCache.has(variable.name)) {
+                throw new MontereyError(
+                    ErrorCodes.BUILD,
+                    `Variable already exists: ${variable.name}`
+                );
+            }
 
-        for (const variable of variables) {
-            if (alreadyWritten.includes(variable.name)) throw new MontereyError(ErrorCodes.BUILD, "Variable already exists at: " + variable.name);
-            let line = ``;
-            if (variable.immutable)
-                line += `const `;
-            else
-                line += `let `;
-
-            line += `${variable.name} = ${variable.value};`;
-            jsArray.push(line);
-            alreadyWritten.push(variable.name);
-        }
-
-        return jsArray;
+            this.variableCache.add(variable.name);
+            const declarationType = variable.immutable ? 'const' : 'let';
+            return `${declarationType} ${variable.name} = ${formatValue(variable.value)};`;
+        });
     }
 
+    /**
+     * Parses and validates Monterey JSON content
+     * @param {string} content - Raw JSON content
+     * @returns {MontereyContent} Parsed and validated content
+     * @throws {MontereyError} When content is invalid
+     */
     parseJSONContent(content: string): MontereyContent {
-        const parsed = JSON.parse(content);
-        if (!("header" in parsed)) throw new MontereyError(ErrorCodes.TRANSPILE_ERROR, "Unable to find Monterey header in the monterey file.", { causedBy: __filename });
-        const parsedType: MontereyContent = parsed as MontereyContent;
-        const { montereyVersion } = parsedType.header;
-        const compared = semver.compare(getMontereyVersion(), montereyVersion);
-        if (compared == 1) throw new MontereyError(ErrorCodes.OUTDATED, "Monterey Version is outdated!");
-        else if (compared == -1) throw new MontereyError(ErrorCodes.INVALID_VERSION, "Monterey Version is invalid!");
-        return parsedType;
-    }
+        try {
+            // Pre-validate JSON structure
+            if (!content || content.trim().length === 0) {
+                throw new MontereyError(
+                    ErrorCodes.TRANSPILE_ERROR,
+                    "Empty Monterey content",
+                    { causedBy: __filename }
+                );
+            }
 
+            const parsed = JSON.parse(content);
+            
+            // Validate required fields
+            if (!parsed || typeof parsed !== 'object') {
+                throw new MontereyError(
+                    ErrorCodes.TRANSPILE_ERROR,
+                    "Invalid JSON structure",
+                    { causedBy: __filename }
+                );
+            }
+
+            if (!("header" in parsed)) {
+                throw new MontereyError(
+                    ErrorCodes.TRANSPILE_ERROR,
+                    "Missing Monterey header",
+                    { causedBy: __filename }
+                );
+            }
+
+            if (!("$schema" in parsed)) {
+                throw new MontereyError(
+                    ErrorCodes.TRANSPILE_ERROR,
+                    "Missing $schema field",
+                    { causedBy: __filename }
+                );
+            }
+
+            const { montereyVersion } = parsed.header;
+            
+            // Validate version format
+            if (!montereyVersion || typeof montereyVersion !== 'string') {
+                throw new MontereyError(
+                    ErrorCodes.INVALID_VERSION,
+                    "Invalid version format",
+                    { causedBy: __filename }
+                );
+            }
+
+            const currentVersion = getMontereyVersion();
+            const versionComparison = semver.compare(currentVersion, montereyVersion);
+
+            if (versionComparison === 1) {
+                throw new MontereyError(
+                    ErrorCodes.OUTDATED,
+                    `Project uses outdated Monterey version ${montereyVersion}. Current version is ${currentVersion}`
+                );
+            } else if (versionComparison === -1) {
+                throw new MontereyError(
+                    ErrorCodes.INVALID_VERSION,
+                    `Project requires Monterey version ${montereyVersion} but current version is ${currentVersion}`
+                );
+            }
+
+            return parsed as MontereyContent;
+        } catch (err) {
+            if (err instanceof MontereyError) throw err;
+            throw new MontereyError(
+                ErrorCodes.TRANSPILE_ERROR,
+                "Failed to parse Monterey content",
+                { causedBy: (err as Error).message }
+            );
+        }
+    }
 }
