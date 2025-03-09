@@ -22,7 +22,7 @@ yarn add monterey.js
 
 ```json
 {
-    "$schema": "https://json.schemastore.org/typings",
+    "$schema": "https://raw.githubusercontent.com/abdullahcxd/monterey.js/main/schema/monterey.schema.json",
     "header": {
         "montereyVersion": "1.0.0"
     },
@@ -89,7 +89,7 @@ A Monterey file consists of:
 Example structure:
 ```json
 {
-    "$schema": "your-schema-url",
+    "$schema": "https://raw.githubusercontent.com/abdullahcxd/monterey.js/main/schema/monterey.schema.json",
     "header": {
         "montereyVersion": "1.0.0"
     },
