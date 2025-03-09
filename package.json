@@ -45,5 +45,17 @@
     "onlyBuiltDependencies": [
       "esbuild"
     ]
-  }
+  },
+  "directories": {
+    "lib": "lib",
+    "test": "test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/abdullahcxd/monterey.js.git"
+  },
+  "bugs": {
+    "url": "https://github.com/abdullahcxd/monterey.js/issues"
+  },
+  "homepage": "https://github.com/abdullahcxd/monterey.js#readme"
 }

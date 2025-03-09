@@ -1,5 +1,7 @@
 <div align="center">
 
+<img src="https://raw.githubusercontent.com/AbdullahCXD/monterey.js/refs/heads/develop/assets/moonjson.svg" width="128" height="128">
+
 # 🚀 Monterey.js
 
 Transform JSON into JavaScript with elegance and type safety.
