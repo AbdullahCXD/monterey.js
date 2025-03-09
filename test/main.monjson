@@ -30,9 +30,9 @@
       "value": "something"
     },
     {
-      "name": "test5",
-      "immutable": false,
-      "value": "something"
+      "name": "test6",
+      "immutable": true,
+      "value": "bump"
     }
   ]
 }

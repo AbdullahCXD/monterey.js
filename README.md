@@ -23,10 +23,10 @@ Ever wished JSON could do more? Monterey.js bridges the gap between static confi
 Get up and running in seconds:
 
 ```bash
-# Using your favorite package manager
-npm i monterey.js      # npm
-pnpm add monterey.js   # pnpm
-yarn add monterey.js   # yarn
+# Install globally using your favorite package manager
+npm i -g monterey.js      # npm
+pnpm add -g monterey.js   # pnpm
+yarn global add monterey.js   # yarn
 ```
 
 ## 📝 Example
@@ -50,16 +50,16 @@ Here's how simple it is to use Monterey:
 }
 ```
 
-2️⃣ Transform it to JavaScript:
-```javascript
-const { Monterey } = require('monterey.js');
+2️⃣ Transform it to JavaScript using the CLI:
+```bash
+# Transform a single file
+monterey build hello.monjson
 
-// Initialize Monterey
-const monterey = new Monterey();
-monterey.setTranspiler();
+# Or watch for changes
+monterey watch hello.monjson
 
-// Transform your code
-const js = monterey.buildFile('hello.monjson');
+# Specify output directory
+monterey build hello.monjson --out dist/
 ```
 
 ## 🎯 Features
@@ -70,6 +70,28 @@ const js = monterey.buildFile('hello.monjson');
 - 🛡️ **Version Control** - Built-in version compatibility checks
 - 🎨 **Modern Syntax** - Clean, readable output code
 - 📝 **Schema Validation** - Catch errors before they happen
+
+## 🛠️ CLI Commands
+
+```bash
+# Build a file or directory
+monterey build <input> [options]
+
+# Watch mode
+monterey watch <input> [options]
+
+# Check file syntax
+monterey check <input>
+
+# Show version
+monterey --version
+
+Options:
+  --out, -o     Output directory
+  --watch, -w   Watch for changes
+  --minify, -m  Minify output
+  --help, -h    Show help
+```
 
 ## 🛠️ API
 
