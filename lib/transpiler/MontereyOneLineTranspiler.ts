@@ -1,54 +1,117 @@
 import { ErrorCodes, MontereyError } from "../errors/MontereyError";
-import { MontereyContent, MontereyVariable } from "../types";
+import { MontereyContent, MontereyVariable, MontereyFunction, MontereyClass, JavaScriptLoader } from "../types";
 import { Transpiler } from "./Transpiler";
 import { getMontereyVersion } from "../MontereyHeaders";
 import semver from "semver";
 import lodash from "lodash";
 import { formatValue } from "../utils";
+import { ContextVariables, Environment, GlobalDefined, Invoker } from "../badgers";
 
 export class MontereyOneLineTranspiler extends Transpiler {
+    private environment?: Environment;
+    private invoker?: Invoker;
+    private variables?: ContextVariables;
+    private globaldef?: GlobalDefined;
+
     constructor() {
         super();
     }
 
     transpile(content: string): string {
         const resolvedJSONCode = this.parseJSONContent(content);
+        this.environment = new Environment(resolvedJSONCode);
+        this.variables = new ContextVariables(resolvedJSONCode);
+        this.invoker = new Invoker(resolvedJSONCode, this.variables!);
+        this.globaldef = new GlobalDefined(resolvedJSONCode);
         return this.toJavaScript(resolvedJSONCode).trim();
     }
 
     toJavaScript(content: MontereyContent) {
-        let javaScriptVariableArray: string[] = [];
+        const sections = {
+            variables: content.variables?.length ? this.resolveVariables(content.variables) : [],
+            functions: content.functions?.length ? this.resolveFunctions(content.functions) : [],
+            classes: content.classes?.length ? this.resolveClasses(content.classes) : []
+        };
 
-        if (content.variables && content.variables.length) {
-            javaScriptVariableArray = this.resolveVariables(content.variables);
-        }
-
-        return this.build(javaScriptVariableArray, [], []);
+        return this.build(content.javascript, sections.variables, sections.functions, sections.classes);
     }
 
-    build(variables: string[], functions: string[], classes: string[]) {
-        // Minify everything into a single line
-        return `/* Minified by Monterey */ ${[...variables, ...classes, ...functions]
+    build(javascript: JavaScriptLoader | undefined, variables: string[], functions: string[], classes: string[]) {
+        const minified = [...variables, ...classes, ...functions]
             .filter(Boolean)
-            .map(line => line.trim())
-            .join(';')};`;
+            .map(line => line.replace(/\s+/g, ' ').trim())
+            .join(';');
+
+        if (!javascript) return `/* Minified by Monterey */ ${minified};`;
+
+        const top = javascript.top?.replace(/\s+/g, ' ').trim() || '';
+        const end = javascript.end?.replace(/\s+/g, ' ').trim() || '';
+        
+        const wrapper = javascript.async ? 
+            `(async()=>{${top};${minified};${end}})();` :
+            `(()=>{${top};${minified};${end}})();`;
+
+        return `/* Minified by Monterey */ ${wrapper}`;
+    }
+
+    resolveFunctions(functions: MontereyFunction[]): string[] {
+        return functions.map(fn => {
+            const params = (fn.parameters || [])
+                .map(p => p.nullable ? `${p.name}=undefined` : p.name)
+                .join(',');
+
+            let body = '';
+            if (fn.body.variables?.length) {
+                body += this.resolveVariables(fn.body.variables).join(';');
+            }
+
+            let returnValue = fn.body.return || 'undefined';
+            returnValue = this.invoker?.resolve(returnValue) ?? returnValue;
+            returnValue = this.variables?.resolve(returnValue) ?? returnValue;
+            returnValue = this.environment?.resolve(returnValue) ?? returnValue;
+            returnValue = this.globaldef?.resolve(returnValue) ?? returnValue;
+
+            return `function ${fn.name}(${params}){${body}return ${returnValue}}`;
+        });
+    }
+
+    resolveClasses(classes: MontereyClass[]): string[] {
+        return classes.map(cls => {
+            const params = cls.constructor.paramters
+                .map(p => p.nullable ? `${p.name}=undefined` : p.name)
+                .join(',');
+
+            const methods = cls.body.functions ? 
+                this.resolveFunctions(cls.body.functions)
+                    .map(f => f.replace('function ', ''))
+                    .join(';') : '';
+
+            return `class ${cls.name}{constructor(${params}){}${methods}}`;
+        });
     }
 
     resolveVariables(variables: MontereyVariable[]): string[] {
-        const jsArray: string[] = [];
-        const alreadyWritten: string[] = [];
+        const alreadyWritten = new Set<string>();
 
-        for (const variable of variables) {
-            if (alreadyWritten.includes(variable.name)) {
-                throw new MontereyError(ErrorCodes.BUILD, "Variable already exists at: " + variable.name);
+        return variables.map(variable => {
+            if (alreadyWritten.has(variable.name)) {
+                throw new MontereyError(ErrorCodes.BUILD, `Variable already exists: ${variable.name}`);
             }
-            
-            // Create ultra-minified declarations without spaces
-            jsArray.push(`${variable.immutable?'const':'let'} ${variable.name}=${formatValue(variable.value)}`);
-            alreadyWritten.push(variable.name);
-        }
+            alreadyWritten.add(variable.name);
 
-        return jsArray;
+            let value = variable.value;
+            if (typeof value === "string") {
+                value = this.invoker?.resolve(value) ?? value;
+                value = this.variables?.resolve(value) ?? value;
+                value = this.environment?.resolve(value) ?? value;
+                value = this.globaldef?.resolve(value) ?? value;
+            }
+            if (value === variable.value) {
+                value = formatValue(value);
+            }
+
+            return `${variable.immutable?'const':'let'}${variable.name}=${value}`;
+        });
     }
 
     parseJSONContent(content: string): MontereyContent {
