@@ -1,6 +1,6 @@
 {
   "name": "monterey.js",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "A JSON (JavaScript Object Notation) converter/language transpiles to JavaScript",
   "main": "dist/index.js",
   "typings": "./typings/index.d.ts",
