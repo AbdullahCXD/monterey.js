@@ -6,13 +6,41 @@
     "properties": {
         "header": {
             "type": "object",
-            "required": ["montereyVersion"],
+            "required": ["montereyVersion", "environment"],
             "description": "Header content of a Monterey file, this is not custom.",
             "properties": {
                 "montereyVersion": {
                     "type": "string",
                     "pattern": "^v?\\d+\\.\\d+\\.\\d+$",
                     "description": "The version of Monterey this file is compatible with"
+                },
+                "environment": {
+                    "type": "array",
+                    "description": "Array of environment variables",
+                    "items": {
+                        "type": "object",
+                        "required": ["name", "value"],
+                        "properties": {
+                            "name": {
+                                "type": "string",
+                                "description": "The name of the environment variable"
+                            },
+                            "value": {
+                                "type": "string",
+                                "description": "The value of the environment variable"
+                            }
+                        }
+                    }
+                },
+                "settings": {
+                    "type": "object",
+                    "description": "Monterey Settings",
+                    "properties": {
+                        "loadDotenv": {
+                            "type": "boolean",
+                            "description": "Load's .env files from your cwd"
+                        }
+                    }
                 }
             }
         },
@@ -20,6 +48,23 @@
             "type": "string",
             "format": "uri",
             "description": "URL to the JSON schema"
+        },
+        "javascript": {
+            "type": "object",
+            "properties": {
+                "top": {
+                    "type": "string",
+                    "description": "Implements raw JavaScript code to the top of the file"
+                },
+                "end": {
+                    "type": "string",
+                    "description": "Implements raw JavaScript code to the end of the file"
+                },
+                "async": {
+                    "type": "boolean",
+                    "description": "Instead of using synchronized function, it uses asynchronous method"
+                }
+            }
         },
         "variables": {
             "type": "array",
@@ -79,6 +124,10 @@
                             },
                             "functions": {
                                 "$ref": "#/properties/functions"
+                            },
+                            "return": {
+                                "description": "Returns a value",
+                                "type": "string"
                             }
                         }
                     }

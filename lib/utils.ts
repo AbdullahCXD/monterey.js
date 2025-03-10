@@ -89,3 +89,9 @@ export function validateMontereyVersion(version: string): boolean {
 export function _clearFormatCache(): void {
     formatCache.clear();
 }
+
+export function createTab(length: number): string {
+    let indent = "";
+    for (let i = 0; i<length; i++) indent += ` `;
+    return indent;
+}

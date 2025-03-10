@@ -27,7 +27,6 @@ export class BuildCommand extends Command {
         const outputDir = join(projectPath, options.output || "dist");
         const monterey = new Monterey();
 
-        console.log(options.transpiler)
 
         // Handle transpiler selection
         switch (options.transpiler?.toLowerCase()) {
@@ -102,7 +101,7 @@ export class BuildCommand extends Command {
 
                     return task.newListr(tasks, { 
                         concurrent: false, // Process files sequentially for better stability
-                        exitOnError: false // Continue building other files if one fails
+                        exitOnError: true // Continue building other files if one fails
                     });
                 }
             }

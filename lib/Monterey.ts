@@ -32,7 +32,7 @@ export class Monterey {
             const content = readFileSync(fileName, "utf-8");
             return this.build(content);
         } catch (err) {
-            throwError(err as Error | MontereyError);
+            throw err;
         }        
     }
 
@@ -42,7 +42,7 @@ export class Monterey {
             const transpiledContent = this.transpiler.transpile(montereyContent);
             return `${getMontereyJavaScriptHeader()}\n\n${transpiledContent}`.trim();
         } catch (err) {
-            throwError(err as Error | MontereyError);
+            throw err;
         }
     } 
 }

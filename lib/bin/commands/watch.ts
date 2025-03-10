@@ -12,6 +12,7 @@ import { Listr } from "listr2";
 export class WatchCommand extends Command {
     private buildCommand: BuildCommand;
     private monterey: Monterey;
+    private isShuttingDown: boolean = false;
 
     constructor() {
         super("watch [dir]", "Watch for changes and rebuild");
@@ -29,32 +30,37 @@ export class WatchCommand extends Command {
     }
 
     private async buildFile(path: string, options: BuildOptions): Promise<void> {
+        if (this.isShuttingDown) return;
+
         const tasks = new Listr(
             [
                 {
                     title: `Building ${path}`,
                     task: async (ctx, task) => {
                         const parsedFile = parse(path);
-                        
-
                         try {
                             const file = this.monterey.buildFile(path);
                             await writeFile(join(options.output ?? "dist", parsedFile.name + '.js'), file);
                             task.title = `Built ${path}`;
                         } catch (error) {
                             task.title = `Failed to build ${path}`;
-                            throw error;
+                            consola.error(`Build error for ${path}:`, error);
+                            // Don't throw, just log the error and continue watching
                         }
                     }
                 }
             ],
-            { concurrent: false }
+            { 
+                concurrent: false,
+                exitOnError: false // Don't exit on error
+            }
         );
 
         try {
             await tasks.run();
         } catch (error) {
-            consola.error(`Build failed:`, error);
+            // Log error but don't exit
+            consola.error(`Build process error:`, error);
         }
     }
 
@@ -67,7 +73,11 @@ export class WatchCommand extends Command {
         const watcher = watch(watchDir, {
             persistent: true,
             ignoreInitial: false,
-            ignored: /(^|[\/\\])\../, // Ignore dot files
+            ignored: [
+                /(^|[\/\\])\../, // Ignore dot files
+                '**/node_modules/**', // Ignore node_modules
+                '**/dist/**' // Ignore dist folder
+            ],
             awaitWriteFinish: {
                 stabilityThreshold: 300,
                 pollInterval: 100
@@ -75,28 +85,36 @@ export class WatchCommand extends Command {
         });
 
         const handleFile = async (path: string) => {
-            if (!path.endsWith('.monjson')) return;
+            if (this.isShuttingDown || !path.endsWith('.monjson')) return;
             
             clearTimeout(debounceTimer);
             debounceTimer = setTimeout(() => this.buildFile(path, options), 100);
+        };
+
+        const cleanup = () => {
+            this.isShuttingDown = true;
+            clearTimeout(debounceTimer);
+            watcher.close();
+            consola.info('Shutting down watch mode...');
+            process.exit(0);
         };
 
         watcher
             .on('add', handleFile)
             .on('change', handleFile)
             .on('unlink', path => {
-                if (path.endsWith('.monjson')) {
+                if (!this.isShuttingDown && path.endsWith('.monjson')) {
                     consola.info(`File ${path} has been removed`);
                 }
             })
             .on('error', error => {
-                consola.error(`Watcher error:`, error);
+                if (!this.isShuttingDown) {
+                    consola.error(`Watcher error:`, error);
+                }
             });
 
         // Handle process termination
-        process.on('SIGINT', () => {
-            watcher.close();
-            process.exit(0);
-        });
+        process.on('SIGINT', cleanup);
+        process.on('SIGTERM', cleanup);
     }
 }

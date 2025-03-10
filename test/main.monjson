@@ -1,7 +1,16 @@
 {
-  "$schema": "https://raw.githubusercontent.com/AbdullahCXD/monterey.js/refs/heads/develop/schema/monterey.schema.json",
+  "$schema": "../schema/monterey.schema.json",
   "header": {
-    "montereyVersion": "1.0.0"
+    "montereyVersion": "1.0.1",
+    "environment": [
+        {
+            "name": "test",
+            "value": "helloWorld"
+        }
+    ],
+    "settings": {
+        "loadDotenv": false
+    }
   },
   "variables": [
     {
@@ -12,7 +21,7 @@
     {
       "name": "test1",
       "immutable": false,
-      "value": "something"
+      "value": "($env:test)"
     },
     {
       "name": "test2",
@@ -32,7 +41,64 @@
     {
       "name": "test6",
       "immutable": true,
-      "value": "bump"
+      "value": "$testMethod()"
+    }
+  ],
+  "javascript": {
+    "async": false,
+    "end": "console.log(testMethod())"
+  },
+  "functions": [
+    {
+        "name": "testMethod",
+        "body": {
+            "variables": [
+                {
+                    "name": "a",
+                    "immutable": true,
+                    "value": 2
+                },
+                {
+                    "name": "b",
+                    "immutable": true,
+                    "value": 2
+                },
+                {
+                    "name": "c",
+                    "immutable": true,
+                    "value": "($globdef:a) + ($globdef:b)"
+                }
+            ],
+            "return": "($globdef:c)"
+        },
+        "parameters": [
+        ]
+    }
+  ],
+  "classes": [
+    {
+        "name": "TestClass",
+        "body": {
+            "variables": [],
+            "functions": [
+                {
+                    "name": "invoke",
+                    "body": {
+                        "variables": [
+                            {
+                                "name": "name",
+                                "immutable": true,
+                                "value": "TestFunction"
+                            }
+                        ]
+                    },
+                    "parameters": []
+                }
+            ]
+        },
+        "constructor": {
+            "paramters": []
+        }
     }
   ]
 }
