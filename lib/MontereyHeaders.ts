@@ -1,4 +1,5 @@
 import pkgJSON from "../package.json";
+import { MontereyVersion } from "./types";
 
 /**
  * Cache for commonly accessed values to improve performance
@@ -41,13 +42,13 @@ export function getMontereyExtension(): string {
  * Uses cached version for better performance
  * @returns {string} Version string prefixed with 'v'
  */
-export function getMontereyVersion(): string {
+export function getMontereyVersion(): MontereyVersion {
     if (!cache.version) {
         cache.version = pkgJSON.version.startsWith('v') ? 
             pkgJSON.version : 
             `v${pkgJSON.version}`;
     }
-    return cache.version;
+    return cache.version as MontereyVersion;
 }
 
 /**

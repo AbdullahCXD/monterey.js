@@ -3,6 +3,10 @@ export type MontereyVersion = `v${string}`;
 export type MontereyURL = `https://${string}` | `file://${string}` | `http://${string}`;
 export type Variable<Prefix extends string> = `($${Prefix}:${string})`;
 
+export interface MontereyBuildOptions {
+  header?: boolean;
+}
+
 export interface JavaScriptLoader {
     top: string;
     end: string;
@@ -18,7 +22,7 @@ export interface MontereyContent {
     classes: MontereyClass[];
 }
 
-export type MontereyBody = Omit<MontereyContent, "header" | "$schema">;
+export type MontereyBody = Omit<MontereyContent, "header" | "$schema" | "javascript">;
 
 export interface MontereyHeader {
     montereyVersion: MontereyVersion;
@@ -50,6 +54,7 @@ export interface MontereyFunction {
     parameters: MontereyFunctionParameter[];
     body: Omit<MontereyBody, "classes"> & {
         return: string;
+        raw: string[];  // Array of raw code statements that aren't variables/functions
     };
     
 }

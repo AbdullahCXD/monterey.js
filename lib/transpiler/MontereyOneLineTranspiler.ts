@@ -65,6 +65,12 @@ export class MontereyOneLineTranspiler extends Transpiler {
                 body += this.resolveVariables(fn.body.variables).join(';');
             }
 
+            // Add raw statements
+            if (fn.body.raw?.length) {
+                if (body) body += ';';
+                body += fn.body.raw.join(';');
+            }
+
             let returnValue = fn.body.return || 'undefined';
             returnValue = this.invoker?.resolve(returnValue) ?? returnValue;
             returnValue = this.variables?.resolve(returnValue) ?? returnValue;

@@ -1,15 +1,10 @@
 {
   "$schema": "../schema/monterey.schema.json",
   "header": {
-    "montereyVersion": "1.0.1",
-    "environment": [
-        {
-            "name": "test",
-            "value": "helloWorld"
-        }
-    ],
+    "montereyVersion": "v1.0.1",
+    "environment": [],
     "settings": {
-        "loadDotenv": false
+      "loadDotenv": false
     }
   },
   "variables": [
@@ -21,7 +16,7 @@
     {
       "name": "test1",
       "immutable": false,
-      "value": "($env:test)"
+      "value": "helloWorld"
     },
     {
       "name": "test2",
@@ -42,63 +37,63 @@
       "name": "test6",
       "immutable": true,
       "value": "$testMethod()"
+    },
+    {
+      "name": "name",
+      "immutable": true,
+      "value": "TestFunction"
     }
   ],
-  "javascript": {
-    "async": false,
-    "end": "console.log(testMethod())"
-  },
   "functions": [
     {
-        "name": "testMethod",
-        "body": {
-            "variables": [
-                {
-                    "name": "a",
-                    "immutable": true,
-                    "value": 2
-                },
-                {
-                    "name": "b",
-                    "immutable": true,
-                    "value": 2
-                },
-                {
-                    "name": "c",
-                    "immutable": true,
-                    "value": "($globdef:a) + ($globdef:b)"
-                }
-            ],
-            "return": "($globdef:c)"
-        },
-        "parameters": [
-        ]
+      "name": "testMethod",
+      "parameters": [],
+      "body": {
+        "variables": [
+          {
+            "name": "a",
+            "immutable": true,
+            "value": 2
+          },
+          {
+            "name": "b",
+            "immutable": true,
+            "value": 2
+          },
+          {
+            "name": "c",
+            "immutable": true,
+            "value": "($globdef:a) + ($globdef:b)"
+          }
+        ],
+        "functions": [],
+        "raw": [
+          "console.log(c);"
+        ],
+        "return": "c"
+      }
     }
   ],
   "classes": [
     {
-        "name": "TestClass",
-        "body": {
-            "variables": [],
-            "functions": [
-                {
-                    "name": "invoke",
-                    "body": {
-                        "variables": [
-                            {
-                                "name": "name",
-                                "immutable": true,
-                                "value": "TestFunction"
-                            }
-                        ]
-                    },
-                    "parameters": []
-                }
-            ]
-        },
-        "constructor": {
-            "paramters": []
-        }
+      "name": "TestClass",
+      "constructor": {
+        "paramters": []
+      },
+      "body": {
+        "variables": [],
+        "functions": [
+          {
+            "name": "invoke",
+            "parameters": [],
+            "body": {
+              "variables": [],
+              "functions": [],
+              "return": "undefined"
+            }
+          }
+        ]
+      }
     }
   ]
 }

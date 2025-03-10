@@ -24,8 +24,12 @@
   "license": "MIT",
   "packageManager": "pnpm@10.6.1",
   "dependencies": {
+    "@babel/parser": "^7.26.9",
+    "@babel/traverse": "^7.26.9",
+    "@babel/types": "^7.26.9",
     "@inquirer/confirm": "^5.1.7",
     "@inquirer/prompts": "^7.3.3",
+    "@types/babel__traverse": "^7.20.6",
     "chokidar": "^4.0.3",
     "commander": "^13.1.0",
     "consola": "^3.4.0",

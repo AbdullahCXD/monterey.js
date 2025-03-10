@@ -128,6 +128,14 @@
                             "return": {
                                 "description": "Returns a value",
                                 "type": "string"
+                            },
+                            "raw": {
+                              "description": "Raw Javascript Code",
+                              "type": "array",
+                              "items": {
+                                "type": "string",
+                                "description": "Raw JavaScript Code"
+                              }
                             }
                         }
                     }

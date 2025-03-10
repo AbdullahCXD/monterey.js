@@ -5,6 +5,7 @@ import { BuildCommand } from "../commands/build";
 import { RunCommand } from "../commands/run";
 import { VersionCommand } from "../commands/version";
 import { WatchCommand } from "../commands/watch";
+import { Jsify } from "../commands/jsify";
 
 export function loadCommands(program: CommanderCommand): void {
     const commands: Command[] = [
@@ -12,7 +13,8 @@ export function loadCommands(program: CommanderCommand): void {
         new BuildCommand(),
         new RunCommand(),
         new VersionCommand(),
-        new WatchCommand()
+        new WatchCommand(),
+        new Jsify(),
     ];
 
     for (const command of commands) {

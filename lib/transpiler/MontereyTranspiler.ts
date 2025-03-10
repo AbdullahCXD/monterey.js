@@ -219,6 +219,8 @@ export class MontereyTranspiler extends Transpiler {
               .map((l) => `    ${l}`)
               .join("\n")
         ),
+        // Add raw statements
+        ...(fn.body.raw || []).map(stmt => `    ${stmt};`),
         `    return ${returnValue};`,
         "}",
       ];
